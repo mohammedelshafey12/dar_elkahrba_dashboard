@@ -1,4 +1,5 @@
 import 'package:dar_elkahrba/screens/add_new_course_screen.dart';
+import 'package:dar_elkahrba/screens/courses_overview_screen.dart';
 import 'package:flutter/material.dart';
 
 class HomePageGridItem extends StatelessWidget {
@@ -16,9 +17,9 @@ class HomePageGridItem extends StatelessWidget {
         onTap: () {
           if (title == "Add a new course") {
             Navigator.of(context)
-                .pushNamed(AddNewCourseScreen.routeName, arguments: title);
+                .pushNamed(AddNewCourseScreen.routeName, arguments: '');
           } else if (title == "Courses") {
-            //Navigator.of(context).pushNamed(AddNewCourseScreen.routeName);
+            Navigator.of(context).pushNamed(CoursesOverviewScreen.routeName);
           } else if (title == "Verify Students") {
             //Navigator.of(context).pushNamed(AddNewCourseScreen.routeName);
           } else if (title == "Students") {
