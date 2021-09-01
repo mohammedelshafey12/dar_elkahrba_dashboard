@@ -1,5 +1,5 @@
 import 'package:dar_elkahrba/providers/course.dart';
-import 'package:dar_elkahrba/screens/add_new_course_screen.dart';
+import 'package:dar_elkahrba/screens/course/add_new_course_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

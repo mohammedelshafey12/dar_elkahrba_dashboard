@@ -4,6 +4,7 @@ class DefaultInput extends StatelessWidget {
   final TextEditingController controller;
   final TextInputType type;
   final validator;
+  final onchange;
   var suffixIcon;
   var onTapSuffixIcon;
   bool obscureText;
@@ -16,11 +17,13 @@ class DefaultInput extends StatelessWidget {
     this.suffixIcon,
     this.onTapSuffixIcon,
     this.obscureText = false,
+    this.onchange
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      onChanged:onchange,
       controller: controller,
       keyboardType: type,
       validator: validator,
