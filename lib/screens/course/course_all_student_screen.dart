@@ -48,6 +48,7 @@ class CourseAllStudentScreen extends StatelessWidget {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10.0),
                       ),
+                      elevation: 3.0,
                       child: InkWell(
                         borderRadius: BorderRadius.circular(10.0),
                         onTap: () {

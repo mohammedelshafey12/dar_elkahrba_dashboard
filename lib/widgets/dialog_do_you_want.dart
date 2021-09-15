@@ -26,7 +26,7 @@ class DialogDoYouWant extends StatelessWidget {
                   onTapYes();
                 },
                 child: Text(
-                  'You',
+                  'Yes',
                   style: TextStyle(
                     color: Colors.white,
                   ),

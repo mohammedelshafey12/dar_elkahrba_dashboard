@@ -51,7 +51,7 @@ class CourseSessionStudentScreen extends StatelessWidget {
                           Constants.navigatorPush(
                             context: context,
                             screen: StudentInfoScreen(
-                              userId: studentData[Constants.userId],
+                              userId: studentData['StudentId'],
                             ),
                           );
                         },
@@ -59,22 +59,13 @@ class CourseSessionStudentScreen extends StatelessWidget {
                           contentPadding: const EdgeInsets.all(20.0),
                           leading: Icon(Icons.book),
                           title: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Text(
-                                studentData[Constants.userName],
+                                studentData['StudentName'],
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 18.0,
-                                ),
-                              ),
-                              SizedBox(
-                                height: height * 0.01,
-                              ),
-                              Text(
-                                '${studentData[Constants.userName]}',
-                                style: TextStyle(
-                                  fontSize: 14.0,
-                                  color: Colors.grey,
                                 ),
                               ),
                             ],
@@ -97,7 +88,7 @@ class CourseSessionStudentScreen extends StatelessWidget {
                       sheetObject.cell(CellIndex.indexByString("B ${1}",),).value = 'SessionName';
                       sheetObject.cell(CellIndex.indexByString("C ${1}",),).value = 'SessionDate';
                       for (int i = 1; i <= snapshot.data!.docs.length; i++) {
-                        sheetObject.cell(CellIndex.indexByString("A ${i + 1}",),).value = snapshot.data!.docs[i - 1][Constants.userName];
+                        sheetObject.cell(CellIndex.indexByString("A ${i + 1}",),).value = snapshot.data!.docs[i - 1]['StudentName'];
                         sheetObject.cell(CellIndex.indexByString("B ${i + 1}",),).value = sessionName;
                         sheetObject.cell(CellIndex.indexByString("C ${i + 1}",),).value = sessionDate;
                       }
