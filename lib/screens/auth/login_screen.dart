@@ -151,39 +151,39 @@ class _LogInScreenState extends State<LogInScreen> {
                                 ),
                               ],
                             ),
-                            SizedBox(
-                              height: height * 0.05,
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    'If you don\'t have an account',
-                                    style: TextStyle(
-                                      fontFamily: 'custom_font',
-                                    ),
-                                    overflow: TextOverflow.ellipsis,
-                                    maxLines: 1,
-                                  ),
-                                ),
-                                TextButton(
-                                  onPressed: () {
-                                    Constants.navigatorPush(
-                                      context: context,
-                                      screen: SignUpScreen(),
-                                    );
-                                  },
-                                  child: Text(
-                                    'Sign Up',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontFamily: 'custom_font_bold',
-                                    ),
-                                  ),
-                                )
-                              ],
-                            ),
+                            // SizedBox(
+                            //   height: height * 0.05,
+                            // ),
+                            // Row(
+                            //   mainAxisAlignment: MainAxisAlignment.center,
+                            //   children: [
+                            //     Expanded(
+                            //       child: Text(
+                            //         'If you don\'t have an account',
+                            //         style: TextStyle(
+                            //           fontFamily: 'custom_font',
+                            //         ),
+                            //         overflow: TextOverflow.ellipsis,
+                            //         maxLines: 1,
+                            //       ),
+                            //     ),
+                            //     TextButton(
+                            //       onPressed: () {
+                            //         Constants.navigatorPush(
+                            //           context: context,
+                            //           screen: SignUpScreen(),
+                            //         );
+                            //       },
+                            //       child: Text(
+                            //         'Sign Up',
+                            //         style: TextStyle(
+                            //           fontWeight: FontWeight.bold,
+                            //           fontFamily: 'custom_font_bold',
+                            //         ),
+                            //       ),
+                            //     )
+                            //   ],
+                            // ),
                           ],
                         ),
                       ),
