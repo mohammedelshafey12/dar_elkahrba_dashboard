@@ -171,13 +171,13 @@ class Store {
     required docId,
   }) {
     fireStore
-        .collection("UsersCollection")
+        .collection(Constants.usersCollection)
         .doc(userId)
-        .collection('MyCourses')
+        .collection(Constants.myCoursesCollection)
         .doc(courseId)
         .set({
-      'CourseId': courseId,
-      'CourseName': courseName,
+      Constants.courseId: courseId,
+      Constants.courseName: courseName,
     });
     courseStudent(
       courseId: courseId,
@@ -195,20 +195,20 @@ class Store {
     required courseName,
   }) {
     fireStore
-        .collection("CourseStudentCollection")
+        .collection(Constants.courseStudentCollection)
         .doc(courseId)
-        .collection('StudentCollection')
+        .collection(Constants.studentCollection)
         .doc(userId)
         .set({
-      'UserId': userId,
-      'UserName': userName,
-      'CourseId': courseId,
-      'CourseName': courseName,
+      Constants.userId: userId,
+      Constants.userName: userName,
+      Constants.courseId: courseId,
+      Constants.courseName: courseName,
     });
   }
 
   void deleteDoc(docId) {
-    fireStore.collection("CourseVerifyCollection").doc(docId).delete();
+    fireStore.collection(Constants.courseVerifyCollection).doc(docId).delete();
   }
 
   getUser(String userId) {
