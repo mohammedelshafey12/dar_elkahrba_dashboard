@@ -1,63 +1,133 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dar_elkahrba/Constants.dart';
-import 'package:dar_elkahrba/Models/CourseModel.dart';
-import 'package:dar_elkahrba/Models/UserModel.dart';
-import 'package:dar_elkahrba/providers/modelHud.dart';
-import 'package:dar_elkahrba/screens/qr/sessions.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:dar_elkahrba/Models/course_model.dart';
+import 'package:dar_elkahrba/Models/admin_model.dart';
+import 'package:dar_elkahrba/Models/course_session_model.dart';
+import 'package:dar_elkahrba/screens/course/course_session_home_screen.dart';
+import 'package:dar_elkahrba/screens/home/home_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 class Store {
-  FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-  /// After Sign in Update User Information In Firebase Firestore
-  adduser(UserModel user) {
-    firestore.collection(Constants.usersCollection).doc(user.userId).set({
-      Constants.userName: user.userName,
-      Constants.userId: user.userId,
-      Constants.userIsAdmin: user.isAdmin
+  /// object from FirebaseFirestore
+  FirebaseFirestore fireStore = FirebaseFirestore.instance;
+
+  /// After Sign up Update User Information In Firebase Firestore
+  addAdmin(AdminModel admin) {
+    fireStore.collection(Constants.adminCollection).doc(admin.adminId).set({
+      Constants.adminId: admin.adminId,
+      Constants.adminName: admin.adminName,
+      Constants.adminEmail: admin.adminEmail
     });
   }
 
-  /// add new course
-  addCourse(CourseModel courseModel, context) {
-    firestore
-        .collection(Constants.courseCollection)
-        .doc(
-          courseModel.courseId,
-        )
-        .set({
-      Constants.courseName: courseModel.courseName,
-      Constants.courseDesc: courseModel.courseDescription,
-      Constants.courseInstructor: courseModel.courseInstructor,
-      Constants.courseId: courseModel.courseId,
-      Constants.coursePrice: courseModel.coursePrice,
-      Constants.courseHours: courseModel.courseHours,
-      Constants.coursePdfUrl: courseModel.coursePdfUrl
-    });
-  }
-
-  /// add new session to course
-  addNewSession(String docId, String date, BuildContext context) {
-    firestore
-        .collection(Constants.courseCollection)
-        .doc(docId)
-        .collection(Constants.coursesSessionCollection)
-        .doc(date)
-        .set({"SessionId": date}).whenComplete(
-      () => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => SessionScreen(
-            date: date,
-            courseId: docId,
+  /// add course for doctor
+  addCourse(context, CourseModel course) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Container(
+          child: Dialog(
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Text('Loading ...'),
+                  CircularProgressIndicator(),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+    var courseDoc =  fireStore.collection(Constants.courseCollection).doc();
+    var courseRev = courseDoc.id;
+    courseDoc.set({
+      Constants.courseId : courseRev,
+      Constants.courseName: course.courseName,
+      Constants.coursePlace: course.coursePlace,
+      Constants.courseInstructorName: course.courseInstructorName,
+      Constants.courseHours: course.courseHours,
+      Constants.coursePrice: course.coursePrice,
+      Constants.coursePdfUrl: course.coursePdfUrl,
+      Constants.courseDescription: course.courseDescription,
+      Constants.courseAdminId: course.courseAdminId,
+    }).whenComplete(() {
+      Constants.navigatorPushAndRemove(
+        context: context,
+        screen: HomeScreen(),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            "Course added successfully",
+            style: TextStyle(
+              fontFamily: 'custom_Font',
+            ),
           ),
         ),
-      ),
-    );
+      );
+    });
   }
+
+
+  /// add session for course
+  addNewSession({
+    required context,
+    required CourseSessionModel session,
+  }) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Container(
+          child: Dialog(
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Text('Loading ...'),
+                  CircularProgressIndicator(),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+    fireStore
+        .collection(Constants.courseCollection)
+        .doc(session.courseId)
+        .collection(Constants.coursesSessionCollection)
+        .doc(session.courseSessionDate)
+        .set({
+      Constants.courseSessionName: session.courseSessionName,
+      Constants.courseSessionDate: session.courseSessionDate,
+    }).whenComplete(() {
+      Constants.navigatorPush(
+        context: context,
+        screen: CourseSessionHomeScreen(
+          courseId: session.courseId,
+          sessionName: session.courseSessionName,
+          sessionDate: session.courseSessionDate,
+        ),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            "Session added successfully",
+            style: TextStyle(
+              fontFamily: 'custom_Font',
+            ),
+          ),
+        ),
+      );
+    });
+  }
+
 
   verifyUser({
     required String userId,
@@ -65,18 +135,17 @@ class Store {
     required String courseId,
     required String courseName,
   }) {
-    firestore
-        .collection("UsersCollection")
+    fireStore.collection(Constants.usersCollection).doc(userId).update({
+      Constants.userIsVerified: true,
+    });
+    fireStore
+        .collection(Constants.usersCollection)
         .doc(userId)
-        .update({Constants.userIsVerified: true});
-    firestore
-        .collection("UsersCollection")
-        .doc(userId)
-        .collection('MyCourses')
+        .collection(Constants.myCoursesCollection)
         .doc(courseId)
         .set({
-      'CourseId': courseId,
-      'CourseName': courseName,
+      Constants.courseId: courseId,
+      Constants.courseName: courseName,
     });
     courseStudent(
       courseId: courseId,
@@ -86,6 +155,14 @@ class Store {
     );
   }
 
+  verifyDoctor({
+    required String doctorId,
+  }) {
+    fireStore.collection(Constants.doctorCollection).doc(doctorId).update({
+      Constants.doctorIsVerify: true,
+    });
+  }
+
   verifyCourse({
     required String userId,
     required String userName,
@@ -93,7 +170,7 @@ class Store {
     required courseName,
     required docId,
   }) {
-    firestore
+    fireStore
         .collection("UsersCollection")
         .doc(userId)
         .collection('MyCourses')
@@ -117,7 +194,7 @@ class Store {
     required courseId,
     required courseName,
   }) {
-    firestore
+    fireStore
         .collection("CourseStudentCollection")
         .doc(courseId)
         .collection('StudentCollection')
@@ -131,15 +208,15 @@ class Store {
   }
 
   void deleteDoc(docId) {
-    firestore.collection("CourseVerifyCollection").doc(docId).delete();
+    fireStore.collection("CourseVerifyCollection").doc(docId).delete();
   }
 
   getUser(String userId) {
-    firestore.collection("UsersCollection").doc(userId).snapshots();
+    fireStore.collection("UsersCollection").doc(userId).snapshots();
   }
 
   Stream<QuerySnapshot> userDataVerfied() {
-    return firestore
+    return fireStore
         .collection("UsersCollection")
         .where(Constants.userIsVerified, isEqualTo: false)
         .where(Constants.userPhotoVerifiedUrl, isNotEqualTo: null)
@@ -149,7 +226,7 @@ class Store {
   Stream<QuerySnapshot> courseVerifyStudent({
     required String courseId,
   }) {
-    return firestore
+    return fireStore
         .collection("CourseVerifyCollection")
         .where('CourseId', isEqualTo: courseId)
         .snapshots();

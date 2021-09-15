@@ -1,302 +1,275 @@
 import 'dart:io';
-import 'dart:typed_data';
 
-import 'package:dar_elkahrba/Models/CourseModel.dart';
+import 'package:dar_elkahrba/Models/course_model.dart';
 import 'package:dar_elkahrba/Servises/store.dart';
-import 'package:dar_elkahrba/providers/course.dart';
-import 'package:dar_elkahrba/providers/modelHud.dart';
-import 'package:dar_elkahrba/screens/course/courses_overview_screen.dart';
+import 'package:dar_elkahrba/providers/model_hud.dart';
+import 'package:dar_elkahrba/widgets/course/add_course_custom_button.dart';
+import 'package:dar_elkahrba/widgets/course/add_course_custom_text_form_field.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 
-class AddNewCourseScreen extends StatefulWidget {
-  static const String routeName = '/Add-new-course';
+import '../../Constants.dart';
+
+class AddCourseScreen extends StatefulWidget {
+  const AddCourseScreen({Key? key}) : super(key: key);
 
   @override
-  _AddNewCourseScreenState createState() => _AddNewCourseScreenState();
+  State<AddCourseScreen> createState() => _AddCourseScreenState();
 }
 
-class _AddNewCourseScreenState extends State<AddNewCourseScreen> {
-  var _isInit = true;
-  var _isUploading = false;
+class _AddCourseScreenState extends State<AddCourseScreen> {
+  final _formKey = GlobalKey<FormState>();
+  TextEditingController courseIdController = TextEditingController();
+  TextEditingController courseNameController = TextEditingController();
+  TextEditingController courseInstructorController = TextEditingController();
+  TextEditingController coursePriceController = TextEditingController();
+  TextEditingController courseHoursController = TextEditingController();
+  TextEditingController courseDescriptionController = TextEditingController();
+  bool _isUploading = false;
   File? pdf;
   var _pdfName = '';
   String? _pdfName2;
   Store _store = Store();
-  String? courseName,
-      courseId,
-      courseInstructor,
-      courseDesc,
-      courseHours,
-      coursePrice;
+  String uid = '';
+  String coursePlace = "Chose Place";
+  late int _value = 1;
 
-  final _formKey = GlobalKey<FormState>();
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    User? userAuth = FirebaseAuth.instance.currentUser;
+    setState(() {
+      uid = userAuth!.uid;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    final deviceSize = MediaQuery.of(context).size;
-
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: const Text('Add new course'),
-      ),
-      body: Center(
-        child: ModalProgressHUD(
-          inAsyncCall: Provider.of<modelHud>(context).isloading,
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  padding: EdgeInsets.all(10),
-                  width: deviceSize.width * 0.7,
-                  height: deviceSize.height * 0.8,
-                  child: Card(
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15)),
-                    child: Form(
-                      key: _formKey,
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: SingleChildScrollView(
-                          child: Column(
-                            children: [
-                              Container(
-                                margin: EdgeInsets.all(10),
-                                padding: EdgeInsets.all(10),
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(10),
-                                    border: Border.all(width: 1)),
-                                child: TextFormField(
-                                  onChanged: (value) {
-                                    setState(() {
-                                      courseName = value;
-                                    });
-                                  },
-                                  validator: (value) {
-                                    if (value!.isEmpty)
-                                      return 'Please Enter the title';
-                                    else
-                                      return null;
-                                  },
-                                  decoration: InputDecoration(
-                                      border: InputBorder.none,
-                                      contentPadding: EdgeInsets.all(5),
-                                      hintText: 'Course Title'),
-                                ),
+    double width = MediaQuery.of(context).size.width;
+    double height = MediaQuery.of(context).size.height;
+    return ModalProgressHUD(
+      inAsyncCall: Provider.of<ModelHud>(context).isLoading,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('Add Course'),
+        ),
+        body: Center(
+          child: Container(
+            width: width * 0.7,
+            padding: const EdgeInsets.all(20.0),
+            // height: height * 0.8,
+            child: Card(
+              elevation: 5.0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15.0),
+              ),
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(20.0),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: AddCourseCustomTextFormField(
+                              title: 'Course Name',
+                              controller: courseNameController,
+                            ),
+                          ),
+                          SizedBox(
+                            width: height * 0.02,
+                          ),
+                          Expanded(
+                            child: AddCourseCustomTextFormField(
+                              title: 'Course Instructor',
+                              controller: courseInstructorController,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(
+                        height: height * 0.02,
+                      ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: AddCourseCustomTextFormField(
+                              title: 'Course Hours',
+                              controller: courseHoursController,
+                            ),
+                          ),
+                          SizedBox(
+                            width: height * 0.02,
+                          ),
+                          Expanded(
+                            child: AddCourseCustomTextFormField(
+                              title: 'Course Price',
+                              controller: coursePriceController,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(
+                        height: height * 0.02,
+                      ),
+                      AddCourseCustomTextFormField(
+                        title: 'Course Description',
+                        controller: courseDescriptionController,
+                      ),
+                      SizedBox(
+                        height: height * 0.02,
+                      ),
+                      Card(
+                        elevation: 0,
+                        margin: EdgeInsets.zero,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                          side: BorderSide(
+                            color: Colors.grey,
+                          ),
+                        ),
+                        child: ListTile(
+                          title: Text(
+                            "Place",
+                          ),
+                          trailing: DropdownButton(
+                            value: _value,
+                            items: [
+                              DropdownMenuItem(
+                                enabled: false,
+                                child: Text("Chose Place"),
+                                value: 1,
                               ),
-                              Container(
-                                margin: EdgeInsets.all(10),
-                                padding: EdgeInsets.all(10),
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(10),
-                                    border: Border.all(width: 1)),
-                                child: TextFormField(
-                                  onChanged: (value) {
-                                    setState(() {
-                                      courseId = value;
-                                    });
-                                  },
-                                  validator: (value) {
-                                    if (value!.isEmpty)
-                                      return 'Please Enter the courseId ';
-                                    else
-                                      return null;
-                                  },
-                                  decoration: InputDecoration(
-                                      border: InputBorder.none,
-                                      contentPadding: EdgeInsets.all(5),
-                                      hintText: 'Course Id'),
-                                ),
+                              DropdownMenuItem(
+                                child: Text(Constants.nasrCityPlace),
+                                value: 2,
                               ),
-                              Container(
-                                margin: EdgeInsets.all(10),
-                                padding: EdgeInsets.all(10),
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(10),
-                                    border: Border.all(width: 1)),
-                                child: TextFormField(
-                                  onChanged: (value) {
-                                    setState(() {
-                                      courseInstructor = value;
-                                    });
-                                  },
-                                  validator: (value) {
-                                    if (value!.isEmpty)
-                                      return 'Please Enter the instructor name';
-                                    else
-                                      return null;
-                                  },
-                                  decoration: InputDecoration(
-                                      border: InputBorder.none,
-                                      contentPadding: EdgeInsets.all(5),
-                                      hintText: 'Course Instructor'),
-                                ),
-                              ),
-                              Container(
-                                margin: EdgeInsets.all(10),
-                                padding: EdgeInsets.all(10),
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(10),
-                                    border: Border.all(width: 1)),
-                                child: TextFormField(
-                                  onChanged: (value) {
-                                    setState(() {
-                                      courseDesc = value;
-                                    });
-                                  },
-                                  validator: (value) {
-                                    if (value!.isEmpty)
-                                      return 'Please Enter the description';
-                                    else
-                                      return null;
-                                  },
-                                  decoration: InputDecoration(
-                                      border: InputBorder.none,
-                                      contentPadding: EdgeInsets.all(5),
-                                      hintText: 'Course Description'),
-                                ),
-                              ),
-                              Container(
-                                margin: EdgeInsets.all(10),
-                                padding: EdgeInsets.all(10),
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(10),
-                                    border: Border.all(width: 1)),
-                                child: TextFormField(
-                                  onChanged: (value) {
-                                    setState(() {
-                                      courseHours = value;
-                                    });
-                                  },
-                                  validator: (value) {
-                                    if (value!.isEmpty)
-                                      return 'Please Enter the hours';
-                                    if (double.tryParse(value) == null)
-                                      return 'Please Enter a number';
-                                    if (double.tryParse(value)! < 0)
-                                      return 'Please Enter a valid number';
-                                    else
-                                      return null;
-                                  },
-                                  decoration: InputDecoration(
-                                      border: InputBorder.none,
-                                      contentPadding: EdgeInsets.all(5),
-                                      hintText: 'Course Hours'),
-                                ),
-                              ),
-                              Container(
-                                margin: EdgeInsets.all(10),
-                                padding: EdgeInsets.all(10),
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(10),
-                                    border: Border.all(width: 1)),
-                                child: TextFormField(
-                                  onChanged: (value) {
-                                    setState(() {
-                                      coursePrice = value;
-                                    });
-                                  },
-                                  validator: (value) {
-                                    if (value!.isEmpty)
-                                      return 'Please Enter the price';
-                                    if (double.tryParse(value) == null)
-                                      return 'Please Enter a numeric price';
-                                    if (double.tryParse(value)! < 0)
-                                      return 'Please Enter a valid price';
-                                    else
-                                      return null;
-                                  },
-                                  decoration: InputDecoration(
-                                      border: InputBorder.none,
-                                      contentPadding: EdgeInsets.all(5),
-                                      hintText: 'Course Price'),
-                                ),
-                              ),
-                              (_isUploading)
-                                  ? Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: CircularProgressIndicator(),
-                                    )
-                                  : Container(
-                                      width: deviceSize.width * 0.2,
-                                      child: Card(
-                                        elevation: 3,
-                                        child: InkWell(
-                                          onTap: _openPicker,
-                                          child: ListTile(
-                                            leading: CircleAvatar(
-                                              child: Text('PDF'),
-                                            ),
-                                            title: Text((_pdfName.isEmpty)
-                                                ? 'Click to add course brochure'
-                                                : _pdfName),
-                                            trailing: Icon(Icons.add),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
+                              DropdownMenuItem(
+                                child: Text(Constants.elMansouraPlace),
+                                value: 3,
+                              )
                             ],
+                            onChanged: (int? value) {
+                              setState(() {
+                                _value = value!;
+                                if (value == 1) {
+                                  setState(() {
+                                    coursePlace = "Chose Place";
+                                  });
+                                } else if (value == 2) {
+                                  setState(() {
+                                    coursePlace = Constants.nasrCityPlace;
+                                  });
+                                } else if (value == 3) {
+                                  coursePlace = Constants.elMansouraPlace;
+                                }
+                              });
+                            },
                           ),
                         ),
                       ),
-                    ),
+                      SizedBox(
+                        height: height * 0.02,
+                      ),
+                      (_isUploading)
+                          ? Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: CircularProgressIndicator(),
+                            )
+                          : Container(
+                              width: width * 0.5,
+                              child: Card(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10.0),
+                                  side: BorderSide(
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                                margin: EdgeInsets.zero,
+                                elevation: 0,
+                                child: InkWell(
+                                  borderRadius: BorderRadius.circular(10.0),
+                                  onTap: _openPicker,
+                                  child: ListTile(
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      vertical: 10.0,
+                                      horizontal: 20.0,
+                                    ),
+                                    leading: CircleAvatar(
+                                      child: Text('PDF'),
+                                    ),
+                                    title: Center(
+                                      child: Text(
+                                        (_pdfName == '')
+                                            ? 'Click to add course brochure'
+                                            : _pdfName,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                    trailing: Icon(Icons.add),
+                                  ),
+                                ),
+                              ),
+                            ),
+                      SizedBox(
+                        height: height * 0.02,
+                      ),
+                      AddCourseCustomButton(
+                        title: 'Add Course',
+                        onPressed: () {
+                          if (_formKey.currentState!.validate()) {
+                            _formKey.currentState!.save();
+                            if (coursePlace == 'Chose Place') {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    "please chose place",
+                                  ),
+                                ),
+                              );
+                            } else {
+                              if (_pdfName2 != null) {
+                                _store.addCourse(
+                                  context,
+                                  CourseModel(
+                                    courseName: courseNameController.text,
+                                    courseHours: courseHoursController.text,
+                                    coursePrice: coursePriceController.text,
+                                    coursePdfUrl: _pdfName2,
+                                    coursePlace: coursePlace,
+                                    courseDescription:
+                                        courseDescriptionController.text,
+                                    courseInstructorName:
+                                        courseInstructorController.text,
+                                    courseAdminId: uid,
+                                  ),
+                                );
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      "please add pdf for this course",
+                                    ),
+                                  ),
+                                );
+                              }
+                            }
+                          }
+                        },
+                      ),
+                    ],
                   ),
                 ),
-                Builder(
-                  builder: (context) => ElevatedButton(
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        _formKey.currentState!.save();
-                        if (_pdfName2 != null) {
-                          //  Provider.of<modelHud>(context, listen: false).isprogressloding(true);
-                          _store.addCourse(
-                              CourseModel(
-                                  courseName,
-                                  courseId,
-                                  courseDesc,
-                                  _pdfName2,
-                                  courseInstructor,
-                                  int.parse(coursePrice!),
-                                  int.parse(courseHours!)),
-                              context);
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                            content: Text(
-                              "Course added successfully",
-                              style: TextStyle(fontFamily: 'customFont'),
-                            ),
-                          ));
-                          _formKey.currentState!.reset();
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => CoursesOverviewScreen(),
-                            ),
-                          );
-                        }
-                      }
-                    },
-                    child: Text(
-                      'Done',
-                      style:
-                          TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-                    ),
-                    style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all(
-                          Color.fromRGBO(38, 231, 122, 1)),
-                      minimumSize: MaterialStateProperty.all(
-                        Size(deviceSize.height * 0.2, deviceSize.width * 0.04),
-                      ),
-                    ),
-                  ),
-                )
-              ],
+              ),
             ),
           ),
         ),
@@ -308,10 +281,9 @@ class _AddNewCourseScreenState extends State<AddNewCourseScreen> {
     final result = await FilePicker.platform
         .pickFiles(type: FileType.custom, allowedExtensions: ['pdf']);
     if (result != null) {
-      Provider.of<modelHud>(context, listen: false).isprogressloding(true);
+      Provider.of<ModelHud>(context, listen: false).isProgressLoading(true);
       final uploadedPdf = result.files.single.bytes;
       final loadedPdfName = result.files.single.name;
-
       Reference reference =
           FirebaseStorage.instance.ref().child('${Uuid().v1()}.pdf');
       final uploadTask = reference.putData(
@@ -320,23 +292,16 @@ class _AddNewCourseScreenState extends State<AddNewCourseScreen> {
           contentType: 'application/pdf',
         ),
       );
-
       uploadTask.whenComplete(() async {
-        Provider.of<modelHud>(context, listen: false).isprogressloding(false);
+        Provider.of<ModelHud>(context, listen: false).isProgressLoading(false);
         final pdf = await uploadTask.snapshot.ref.getDownloadURL();
-        print(pdf);
-        //_editedCourse = _editedCourse.copyWith(pdfUrl: pdf);
         setState(() {
           _pdfName = loadedPdfName;
           _pdfName2 = pdf;
-          _isUploading = false;
+          _isUploading = true;
         });
-        // Scaffold.of(context).showSnackBar(SnackBar(
-        //   content: Text(
-        //     "First pick Image By click on photo",
-        //     style: TextStyle(fontFamily: 'customFont'),
-        //   ),
-        // ));
+      }).whenComplete(() {
+        _isUploading = false;
       });
     }
   }

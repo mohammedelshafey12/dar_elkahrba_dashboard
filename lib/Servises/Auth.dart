@@ -1,30 +1,33 @@
-
-import 'package:dar_elkahrba/screens/home_screen.dart';
+import 'package:dar_elkahrba/screens/home/home_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-
+import '../Constants.dart';
 
 class Auth {
-
   final _auth = FirebaseAuth.instance;
 
-  Future sign_up_with_email_and_password(
-      String Email, String Password,context) async {
+  Future signUpWithEmailAndPassword({
+    required String email,
+    required String password,
+    required context,
+  }) async {
     try {
-      UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-          email: Email,
-          password: Password
+      UserCredential userCredential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(email: email, password: password);
+      Constants.navigatorPushAndRemove(
+        context: context,
+        screen: HomeScreen(),
       );
-      Navigator.push(context, MaterialPageRoute(builder: (context)=>HomeScreen()));
       return userCredential;
     } on FirebaseAuthException catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(
-          e.message.toString(),
-          style: TextStyle(fontFamily: 'custom_font'),
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            e.message.toString(),
+          ),
         ),
-      ));
+      );
       print(e.message);
       if (e.code == 'weak-password') {
         print(e.message);
@@ -34,24 +37,28 @@ class Auth {
     } catch (e) {
       print(e);
     }
-
   }
 
-
-  Future<void> sign_in_with_email_and_password(
-      String Email, String Password,context) async {
+  Future<void> signInWithEmailAndPassword({
+    required String email,
+    required String password,
+    required context,
+  }) async {
     try {
-      UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
-          email: Email,
-          password: Password
+      UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
+        password: password,
       );
-      Navigator.push(context, MaterialPageRoute(builder: (context)=>HomeScreen()));
+      Constants.navigatorPushAndRemove(
+        context: context,
+        screen: HomeScreen(),
+      );
       return null;
     } on FirebaseAuthException catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(
           e.message.toString(),
-          style: TextStyle(fontFamily: 'custom_font'),
         ),
       ));
       print(e.message);
@@ -65,17 +72,11 @@ class Auth {
     }
   }
 
-
-  Future signout() async{
-    try{
+  Future signOut() async {
+    try {
       return await _auth.signOut();
-    }catch (e){
+    } catch (e) {
       print(e.toString());
     }
   }
-
-
-
-
-
 }
