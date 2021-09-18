@@ -7,6 +7,7 @@ class CourseModel {
   String? courseDescription;
   String? courseAdminId;
   String? courseInstructorName;
+  String? courseImageUrl;
 
   CourseModel({
     required this.courseName,
@@ -16,6 +17,7 @@ class CourseModel {
     required this.coursePrice,
     required this.courseHours,
     required this.courseAdminId,
+    required this.courseImageUrl,
     required this.courseInstructorName,
   });
 }

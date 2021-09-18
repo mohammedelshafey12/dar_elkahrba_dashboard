@@ -48,6 +48,7 @@ class Store {
     courseDoc.set({
       Constants.courseId : courseRev,
       Constants.courseName: course.courseName,
+      Constants.courseImageUrl: course.courseImageUrl,
       Constants.coursePlace: course.coursePlace,
       Constants.courseInstructorName: course.courseInstructorName,
       Constants.courseHours: course.courseHours,

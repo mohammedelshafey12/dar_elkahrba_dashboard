@@ -55,6 +55,7 @@ class Constants{
    /// Firebase Constants course
    static const String courseId = 'CourseId';
    static const String courseName = 'CourseName';
+   static const String courseImageUrl = 'CourseImageUrl';
    static const String coursePrice = 'CoursePrice';
    static const String coursePlace = 'CoursePlace';
    static const String courseHours = 'CourseHours';

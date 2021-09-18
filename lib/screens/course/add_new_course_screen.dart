@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:dar_elkahrba/Models/course_model.dart';
 import 'package:dar_elkahrba/Servises/store.dart';
@@ -10,6 +11,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker_web/image_picker_web.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
@@ -39,6 +41,8 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
   String uid = '';
   String coursePlace = "Chose Place";
   late int _value = 1;
+  var _image;
+  String courseImageUrl = '';
 
   void initState() {
     // TODO: implement initState
@@ -76,6 +80,75 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 20.0),
+                            child: Center(
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.blueAccent,
+                                ),
+                                width: height * 0.15,
+                                height: height * 0.15,
+                                child: _image == null
+                                    ? Icon(
+                                        Icons.add_a_photo,
+                                        color: Colors.white,
+                                      )
+                                    : Icon(
+                                        Icons.cloud_done,
+                                        color: Colors.white,
+                                      ),
+                              ),
+                            ),
+                          ),
+                          _image == null
+                              ? MaterialButton(
+                                  padding: const EdgeInsets.all(15.0),
+                                  onPressed: () {
+                                    _imgFromGallery();
+                                  },
+                                  child: Text(
+                                    'Click to Pick Photo',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                  color: Colors.blueAccent,
+                                  elevation: 0.0,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10.0),
+                                  ),
+                                )
+                              : courseImageUrl == ''
+                                  ? MaterialButton(
+                                      padding: const EdgeInsets.all(15.0),
+                                      onPressed: () {
+                                        uploadFile();
+                                      },
+                                      child: Text(
+                                        'Upload Photo',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                          letterSpacing: 0.5,
+                                        ),
+                                      ),
+                                      color: Colors.blueAccent,
+                                      elevation: 0.0,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(10.0),
+                                      ),
+                                    )
+                                  : Container(),
+                        ],
+                      ),
                       Row(
                         children: [
                           Expanded(
@@ -228,40 +301,51 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {
                             _formKey.currentState!.save();
-                            if (coursePlace == 'Chose Place') {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    "please chose place",
-                                  ),
-                                ),
-                              );
-                            } else {
-                              if (_pdfName2 != null) {
-                                _store.addCourse(
-                                  context,
-                                  CourseModel(
-                                    courseName: courseNameController.text,
-                                    courseHours: courseHoursController.text,
-                                    coursePrice: coursePriceController.text,
-                                    coursePdfUrl: _pdfName2,
-                                    coursePlace: coursePlace,
-                                    courseDescription:
-                                        courseDescriptionController.text,
-                                    courseInstructorName:
-                                        courseInstructorController.text,
-                                    courseAdminId: uid,
-                                  ),
-                                );
-                              } else {
+                            if (_image != null && courseImageUrl != '') {
+                              if (coursePlace == 'Chose Place') {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                     content: Text(
-                                      "please add pdf for this course",
+                                      "please chose place",
                                     ),
                                   ),
                                 );
+                              } else {
+                                if (_pdfName2 != null) {
+                                  _store.addCourse(
+                                    context,
+                                    CourseModel(
+                                      courseName: courseNameController.text,
+                                      courseHours: courseHoursController.text,
+                                      coursePrice: coursePriceController.text,
+                                      coursePdfUrl: _pdfName2,
+                                      coursePlace: coursePlace,
+                                      courseImageUrl: courseImageUrl,
+                                      courseDescription:
+                                          courseDescriptionController.text,
+                                      courseInstructorName:
+                                          courseInstructorController.text,
+                                      courseAdminId: uid,
+                                    ),
+                                  );
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        "please add pdf for this course",
+                                      ),
+                                    ),
+                                  );
+                                }
                               }
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    "please add photo for this course",
+                                  ),
+                                ),
+                              );
                             }
                           }
                         },
@@ -303,6 +387,35 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
       }).whenComplete(() {
         _isUploading = false;
       });
+    }
+  }
+
+  _imgFromGallery() async {
+    Uint8List? fromPicker;
+    fromPicker = (await ImagePickerWeb.getImage(outputType: ImageType.bytes))
+        as Uint8List?;
+    setState(() {
+      _image = fromPicker;
+    });
+  }
+
+  Future uploadFile() async {
+    if (_image != null) {
+      Provider.of<ModelHud>(context, listen: false).isProgressLoading(true);
+      User? userAuth = FirebaseAuth.instance.currentUser;
+      final feedStorage = FirebaseStorage.instanceFor();
+      Reference refFeedBucket = feedStorage.ref().child('${Uuid().v1()}.png');
+
+      var uploadedFile = await refFeedBucket.putData(_image);
+
+      if (uploadedFile.state == TaskState.success) {
+        String downloadUrl = '';
+        downloadUrl = await refFeedBucket.getDownloadURL();
+        Provider.of<ModelHud>(context, listen: false).isProgressLoading(false);
+        setState(() {
+          courseImageUrl = downloadUrl;
+        });
+      }
     }
   }
 }
