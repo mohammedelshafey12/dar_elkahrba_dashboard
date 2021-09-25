@@ -1,10 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dar_elkahrba/Servises/store.dart';
-import 'package:dar_elkahrba/widgets/dialog_do_you_want.dart';
 import 'package:dar_elkahrba/widgets/loading_page.dart';
 import 'package:dar_elkahrba/widgets/verify/verify_student_card_item.dart';
 import 'package:flutter/material.dart';
-import 'dart:html' as html;
 import '../../constants.dart';
 
 class VerifyStudentScreen extends StatelessWidget {
@@ -22,8 +20,14 @@ class VerifyStudentScreen extends StatelessWidget {
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection(Constants.usersCollection)
-            .where(Constants.userIsVerified, isEqualTo: false)
-            .where(Constants.userPhotoVerifiedUrl, isNotEqualTo: null)
+            .where(
+              Constants.userIsVerified,
+              isEqualTo: false,
+            )
+            .where(
+              Constants.userPhotoVerifiedUrl,
+              isNotEqualTo: null,
+            )
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
