@@ -93,4 +93,30 @@ class Constants{
              (route) => false,
       );
    }
+
+   /// dialog loading
+   static void dialogLoading({
+      required context,
+      required title,
+   }) {
+      showDialog(
+         context: context,
+         barrierDismissible: false,
+         builder: (context) {
+            return AlertDialog(
+               content: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                     CircularProgressIndicator(
+
+                     ),
+                     Text(
+                        title,
+                     ),
+                  ],
+               ),
+            );
+         },
+      );
+   }
  }

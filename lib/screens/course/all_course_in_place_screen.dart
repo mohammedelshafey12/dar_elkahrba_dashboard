@@ -38,8 +38,10 @@ class AllCourseInPlaceScreen extends StatelessWidget {
               itemCount: snapshot.data!.docs.length,
               itemBuilder: (context, index) {
                 var courseData =  snapshot.data!.docs[index];
+                String courseId = snapshot.data!.docs[index].id;
                 return  AllCourseInPlaceCardItem(
                   courseData: courseData,
+                  courseId: courseId,
                 );
               },
             );

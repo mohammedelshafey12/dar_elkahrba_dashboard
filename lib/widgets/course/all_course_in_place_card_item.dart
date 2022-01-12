@@ -1,3 +1,4 @@
+import 'package:dar_elkahrba/Servises/store.dart';
 import 'package:flutter/material.dart';
 
 import '../../Constants.dart';
@@ -7,9 +8,11 @@ class AllCourseInPlaceCardItem extends StatelessWidget {
   const AllCourseInPlaceCardItem({
     Key? key,
     required this.courseData,
+    required this.courseId
   });
 
   final courseData;
+  final String courseId;
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +61,55 @@ class AllCourseInPlaceCardItem extends StatelessWidget {
               ),
             ],
           ),
-          trailing: Icon(Icons.info),
+          trailing: IconButton(icon:Icon(Icons.delete_forever),color: Colors.red, onPressed: () {
+            showDialog(
+              context: context,
+              builder: (context) {
+                return AlertDialog(
+                  title: Text('delete',style: TextStyle(color: Colors.red),),
+                  content: Text(
+                      'Do you want to delete this course?'),
+                  actions: <Widget>[
+                    FlatButton(
+                      color: Colors.green,
+                      onPressed: () {
+                        Store store = Store();
+                        Constants.dialogLoading(
+                          context: context,
+                          title: 'deleting this course',
+                        );
+                         store.deleteCourse(courseId: courseId,context: context).then((value) {
+                           Navigator.pop(context);
+                           Navigator.pop(context);
+                         }
+                         );
+
+                      },
+                      child: Text(
+                        'Yes',
+                        style: TextStyle(
+                            color: Colors.white),
+                      ),
+                    ),
+
+                    FlatButton(
+                      color: Colors.red,
+                      onPressed: () {
+                        print("you choose no");
+                        Navigator.of(context)
+                            .pop(false);
+                      },
+                      child: Text(
+                        'No',
+                        style: TextStyle(
+                            color: Colors.white),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            );
+          },),
         ),
       ),
     );

@@ -5,6 +5,7 @@ import 'package:dar_elkahrba/Models/admin_model.dart';
 import 'package:dar_elkahrba/Models/course_session_model.dart';
 import 'package:dar_elkahrba/screens/course/course_session_home_screen.dart';
 import 'package:dar_elkahrba/screens/home/home_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -129,6 +130,21 @@ class Store {
     });
   }
 
+ Future refuseUser ({
+    required String userId,
+
+  }) async{
+
+    await fireStore
+        .collection(Constants.usersCollection)
+        .doc(userId)
+        .update({
+      Constants.userPhotoVerifiedUrl:null,
+
+    });
+
+  }
+
 
   verifyUser({
     required String userId,
@@ -206,6 +222,132 @@ class Store {
       Constants.courseId: courseId,
       Constants.courseName: courseName,
     });
+  }
+
+  /// delete course
+  Future deleteCourse({
+    required courseId,
+    required context
+  }) async {
+    final courseSessions =await fireStore
+        .collection(Constants.courseCollection)
+        .doc(courseId)
+        .collection(Constants.coursesSessionCollection).get();
+    if (courseSessions.docs.isNotEmpty){
+      fireStore
+          .collection(Constants.courseCollection)
+          .doc(courseId)
+          .collection(Constants.coursesSessionCollection)
+          .get()
+          .then(
+            (snapshot) async{
+              for (DocumentSnapshot i in snapshot.docs) {
+                final courseSseionStudentCollection = await fireStore
+                    .collection(Constants.courseCollection)
+                    .doc(courseId)
+                    .collection(Constants.coursesSessionCollection)
+                    .doc(i.id)
+                    .collection(Constants.coursesSessionStudentCollection)
+                    .get();
+                if(courseSseionStudentCollection.docs.isNotEmpty){
+                  fireStore
+                      .collection(Constants.courseCollection)
+                      .doc(courseId)
+                      .collection(Constants.coursesSessionCollection)
+                      .doc(i.id)
+                      .collection(Constants.coursesSessionStudentCollection)
+                      .get()
+                      .then(
+                        (snapshot) {
+                      for (DocumentSnapshot j in snapshot.docs) {
+                        j.reference.delete();
+                      }
+                    },
+                  ).whenComplete(
+                        () {
+                      fireStore.collection(Constants.courseStudentCollection).doc(courseId).delete();
+                    },
+                  );
+                } else{
+                  fireStore
+                      .collection(Constants.courseCollection)
+                      .doc(courseId)
+                      .collection(Constants.coursesSessionCollection)
+                      .get()
+                      .then(
+                        (snapshot) {
+                      for (DocumentSnapshot i in snapshot.docs) {
+                        i.reference.delete();
+                      }
+                    },
+                  ).whenComplete(
+                        () {
+                          fireStore.collection(Constants.courseCollection).doc(courseId).delete();
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Course deleted")))  ;
+                    },
+                  );
+                }
+              }
+        },
+      );
+    } else{
+      fireStore.collection(Constants.courseCollection).doc(courseId).delete();
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Course deleted")))  ;
+    }
+
+    fireStore
+        .collection(Constants.courseStudentCollection)
+        .doc(courseId)
+        .get().whenComplete((){
+      var coursesSessionCollection =  fireStore
+          .collection(Constants.courseCollection)
+          .doc(courseId)
+          .collection(Constants.coursesSessionCollection).doc();
+      if(coursesSessionCollection!= null){
+        fireStore
+            .collection(Constants.courseCollection)
+            .doc(courseId)
+            .collection(Constants.coursesSessionCollection)
+            .get().then(
+              (snapshot) {
+            fireStore
+                .collection(Constants.courseStudentCollection)
+                .doc(courseId)
+                .collection(Constants.studentCollection)
+                .get()
+                .then(
+                  (snapshot) {
+                for (DocumentSnapshot j in snapshot.docs) {
+                  j.reference.delete();
+                }
+              },
+            ).whenComplete(
+                  () {
+                fireStore.collection(Constants.courseStudentCollection).doc(courseId).delete();
+              },
+            );
+
+          },
+        );
+      }
+      else{
+        fireStore.collection(Constants.courseStudentCollection).doc(courseId).delete();
+      }
+
+    });
+    User? userAuth = FirebaseAuth.instance.currentUser;
+    var coursesStudentCollection =  fireStore
+        .collection(Constants.usersCollection)
+        .where(Constants.userIsVerified , isEqualTo: true).firestore
+        .collection(Constants.myCoursesCollection).doc();
+    if(coursesStudentCollection!=null){
+          fireStore
+          .collection(Constants.usersCollection)
+          ..where(Constants.userIsVerified , isEqualTo: true).firestore
+          .collection(Constants.myCoursesCollection).doc(courseId).delete();
+    }
+
+
   }
 
   void deleteDoc(docId) {
